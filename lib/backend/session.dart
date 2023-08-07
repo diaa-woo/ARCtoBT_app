@@ -13,7 +13,7 @@ class Session {
     print('post() url: $url');
 
     http.Response response = await http.post(
-      Uri.encodeFull(url) as Uri,
+      Uri.parse(url),
       body: json.encode(data),
       headers: headers
     );
@@ -22,7 +22,7 @@ class Session {
     if (statusCode < 200 || statusCode > 400 || json == null) {
       // TODO: input
     }
-    return json.decode(utf8.decode(response.bodyBytes));
+    return utf8.decode(response.bodyBytes);
   }
 }
 
