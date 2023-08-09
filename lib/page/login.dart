@@ -32,13 +32,17 @@ class Login extends StatelessWidget {
                 var data = {
                   'id': pwController.text
                 };
-                final String key = await Session().post('http://192.168.219.108:5000/login', data);
+                final String key = await Session().post(url: 'http://192.168.219.104:5000/login', data: data);
                 if(context.mounted) {
                   if (key == '?') {
                     showToast();
                   }
                   else {
-                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Connect(loginKey: key)), (route) => false);
+                    data = {
+                      'key': key
+                    };
+                    final dynamic paireds = await Session().post(url: 'http://192.168.219.104:5000/paired', data: data, status: true);
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Connect(loginKey: key, paireds: paireds,)), (route) => false);
                   }
                 }
               },
