@@ -9,7 +9,7 @@ class Session {
 
   Map<String, String> cookies = {};   // 쿠키 대신 키 값을 넣어줄 예정
 
-  Future<dynamic> post(String url, dynamic data) async {
+  Future<dynamic> post({required String url, required dynamic data, bool status=false}) async {
     print('post() url: $url');
 
     http.Response response = await http.post(
@@ -22,7 +22,11 @@ class Session {
     if (statusCode < 200 || statusCode > 400 || json == null) {
       // TODO: input
     }
-    return utf8.decode(response.bodyBytes);
+    if(status==true) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    } else {
+      return utf8.decode(response.bodyBytes);
+    }
   }
 }
 
