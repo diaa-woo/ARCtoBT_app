@@ -1,4 +1,5 @@
 import 'package:arctobt_app/backend/device_list.dart';
+import 'package:arctobt_app/backend/session.dart';
 import 'package:arctobt_app/model/device_model.dart';
 import 'package:flutter/material.dart';
 
@@ -12,9 +13,14 @@ class Connect extends StatefulWidget {
 }
 
 class _ConnectState extends State<Connect> {
+  bool _connected = false;
+  int? _index;
+  List<dynamic>? _device_list;
+
   @override
   Widget build(BuildContext context) {
     List<dynamic> _devices = DeviceList.fromJson(widget.paireds).devices ?? <DeviceModel>[];
+    _device_list = _devices;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -22,6 +28,17 @@ class _ConnectState extends State<Connect> {
           centerTitle: true,
           elevation: 0,
           leading: const IconButton(icon: Icon(Icons.find_replace), onPressed: null,),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                print(_index);
+                _connected ?
+                  await disconnect()
+                  : print("null");
+              },
+              icon: Icon(_connected ? Icons.check_circle : Icons.circle, color: _connected ? Colors.green : Colors.grey )
+            )
+          ],
         ),
         body: Column(
           children: [
@@ -38,13 +55,15 @@ class _ConnectState extends State<Connect> {
                       child: Text(_devices[index].name),
                     ),
                   ),
-                  onTap: () {
-
+                  onTap: () async {
+                    _connected ?
+                        print('null') :
+                        await connect(index: index);
                   },
                 );
               },
               separatorBuilder: (BuildContext context, int index) {
-                return Divider();
+                return const Divider();
               },
             ),
             const Divider(),
@@ -53,5 +72,39 @@ class _ConnectState extends State<Connect> {
         )
       ),
     );
+  }
+
+  Future<dynamic> connect({required int index}) async {
+    var data = {
+      "key": widget.loginKey,
+      "mac_addr": _device_list?[index].mac_address
+    };
+    final String result = await Session().post(url: 'http://192.168.219.101:5000/connect', data: data);
+    if(result == 'Done!') {
+      setState(() {
+        _connected = true;
+        _index = index;
+      });
+    }
+    else {
+      print("Fail");
+    }
+  }
+
+  Future<dynamic> disconnect() async {
+    var data = {
+      "key": widget.loginKey,
+      "mac_addr": _device_list?[_index!].mac_address
+    };
+    final String result = await Session().post(url: 'http://192.168.219.101:5000/disconnect', data: data);
+    if(result == 'Done!') {
+      setState(() {
+        _connected = true;
+        _index = null;
+      });
+    }
+    else {
+      print("Fail");
+    }
   }
 }
